@@ -121,7 +121,7 @@ function renderHomePage(): Response {
           </form>
         </div>
 
-        <div class="footer">Powered by Cloudflare Workers</div>
+        <div class="footer">Powered by <img src="/public/workers.webp" height="16px">Cloudflare Workers</div>
       </div>
 
       <script>
