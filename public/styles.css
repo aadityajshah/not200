@@ -333,3 +333,88 @@ button:hover { background: #1d4ed8; }
 [data-mode="night"][data-theme="space"] .space-stars { opacity: 0.95; }
 [data-mode="night"][data-theme="space"] .space-stars2 { opacity: 0.75; }
 [data-mode="night"][data-theme="space"] .space-planet { background: radial-gradient(closest-side, #1d4ed8 0%, #0b225f 55%, rgba(2,6,23,0) 56%); opacity: 0.8; }
+
+/* Report button and toast */
+.report-btn { background: #f59e0b; border: 1px solid #d97706; color: #0b1220; padding: 8px 12px; border-radius: 6px; font-weight: 700; }
+.report-btn:hover { background: #d97706; }
+.report-btn[disabled] { background: #475569; border-color: #334155; color: #cbd5e1; cursor: not-allowed; opacity: 0.75; }
+
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10000;
+  background: #0a1222;
+  color: #e2e8f0;
+  border: 1px solid #1f2a44;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+  display: flex; align-items: center; gap: 10px;
+  min-width: 220px;
+}
+.toast.success { border-color: #16a34a; }
+.toast.error { border-color: #ef4444; }
+.toast .icon { font-size: 16px; }
+.toast .msg { font-weight: 600; }
+
+
+/* Outdoors theme: use day/night images when data-mode is set */
+[data-theme="outdoors"][data-mode="day"] .outdoor-bg {
+  background: url("/day.png") center center / cover no-repeat;
+}
+[data-theme="outdoors"][data-mode="day"] .outdoor-sky,
+[data-theme="outdoors"][data-mode="day"] .outdoor-sun,
+[data-theme="outdoors"][data-mode="day"] .outdoor-mountains,
+[data-theme="outdoors"][data-mode="day"] .outdoor-foreground {
+  display: none !important;
+}
+
+[data-theme="outdoors"][data-mode="night"] .outdoor-bg {
+  background: url("/night.png") center center / cover no-repeat;
+}
+[data-theme="outdoors"][data-mode="night"] .outdoor-sky,
+[data-theme="outdoors"][data-mode="night"] .outdoor-sun,
+[data-theme="outdoors"][data-mode="night"] .outdoor-mountains,
+[data-theme="outdoors"][data-mode="night"] .outdoor-foreground {
+  display: none !important;
+}
+
+/* Optional: if no explicit data-mode, honor system dark mode for Outdoors image */
+@media (prefers-color-scheme: dark) {
+  [data-theme="outdoors"]:not([data-mode]) .outdoor-bg {
+    background: url("/night.png") center center / cover no-repeat;
+  }
+  [data-theme="outdoors"]:not([data-mode]) .outdoor-sky,
+  [data-theme="outdoors"]:not([data-mode]) .outdoor-sun,
+  [data-theme="outdoors"]:not([data-mode]) .outdoor-mountains,
+  [data-theme="outdoors"]:not([data-mode]) .outdoor-foreground { display: none !important; }
+}
+
+/* Outdoors image overlay for better text contrast */
+[data-theme="outdoors"][data-mode="day"] .outdoor-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.22) 40%, rgba(0,0,0,0.28) 100%);
+  pointer-events: none;
+}
+
+[data-theme="outdoors"][data-mode="night"] .outdoor-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.34) 40%, rgba(0,0,0,0.42) 100%);
+  pointer-events: none;
+}
+
+/* Fallback overlay for Outdoors when data-mode is not set */
+@media (prefers-color-scheme: dark) {
+  [data-theme="outdoors"]:not([data-mode]) .outdoor-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.26) 0%, rgba(0,0,0,0.32) 40%, rgba(0,0,0,0.40) 100%);
+    pointer-events: none;
+  }
+}

@@ -28,6 +28,67 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.replace(newUrl);
   });
 
+  // Report button handler with disabled state + toast feedback
+  function showToast(message, type = 'success') {
+    try {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span class="icon">${type === 'success' ? '✅' : '⚠️'}</span><span class="msg">${message}</span>`;
+      document.body.appendChild(el);
+      setTimeout(() => {
+        el.style.transition = 'opacity 200ms ease';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 220);
+      }, 2200);
+    } catch {}
+  }
+
+  const reportBtn = document.getElementById('reportBtn');
+  reportBtn?.addEventListener('click', async () => {
+    try {
+      if (reportBtn.disabled) return;
+
+      const codeMeta = document.querySelector('meta[name="x-status-code"]');
+      const emailMeta = document.querySelector('meta[name="x-user-email"]');
+      let code = 0;
+      if (codeMeta) {
+        code = parseInt(codeMeta.getAttribute('content') || '0', 10) || 0;
+      } else {
+        // Fallback: parse from heading text
+        const h1 = document.querySelector('h1');
+        const m = h1?.textContent?.match(/(\d{3})/);
+        if (m) code = parseInt(m[1], 10);
+      }
+      const email = emailMeta?.getAttribute('content') || '';
+
+      const prevText = reportBtn.textContent;
+      reportBtn.disabled = true;
+      reportBtn.textContent = 'Sending…';
+
+      const res = await fetch('/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, ...(email ? { email } : {}) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data?.ok === false) {
+        showToast('Failed to send report.', 'error');
+        reportBtn.disabled = false;
+        reportBtn.textContent = prevText || 'Report';
+        return;
+      }
+      showToast('Report sent. Thank you!', 'success');
+      reportBtn.textContent = 'Reported';
+      // keep disabled to indicate completion
+    } catch (err) {
+      showToast('Something went wrong sending the report.', 'error');
+      if (reportBtn) {
+        reportBtn.disabled = false;
+        reportBtn.textContent = 'Report';
+      }
+    }
+  });
+
   // Mode toggle only meaningful for outdoors theme
   toggle?.addEventListener('click', () => {
     const p = new URLSearchParams(window.location.search);

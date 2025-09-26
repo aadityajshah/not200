@@ -1,9 +1,42 @@
+
 import { getStatusInfo } from './status-codes';
 interface StatusCodeInfo {
   code: number;
   name: string;
   description: string;
   emoji: string;
+}
+
+async function sendReportEmail(toEmail: string, subject: string, textContent: string): Promise<Response> {
+  const payload = {
+    personalizations: [
+      {
+        to: [{ email: toEmail }],
+      },
+    ],
+    from: { email: 'no-reply@not200.example', name: 'Not200 Reporter' },
+    subject,
+    content: [{ type: 'text/plain', value: textContent }],
+  };
+
+  const res = await fetch('https://api.mailchannels.net/tx/v1/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return res;
+}
+
+function formatUtcTimestamp(d: Date): string {
+  // HH:MM:SS UTC Month Day, Year
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const mm = String(d.getUTCMinutes()).padStart(2, '0');
+  const ss = String(d.getUTCSeconds()).padStart(2, '0');
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const month = months[d.getUTCMonth()];
+  const day = d.getUTCDate();
+  const year = d.getUTCFullYear();
+  return `${hh}:${mm}:${ss} UTC ${month} ${day}, ${year}`;
 }
 
 type Theme = 'current' | 'space' | 'outdoors';
@@ -19,158 +52,7 @@ function escapeHtml(input: string): string {
 
 function renderHomePage(theme?: Theme): Response {
   const themeAttr = theme && theme !== 'current' ? ` data-theme="${theme}"` : '';
-  const html = (theme === "space" ? `
-    <!DOCTYPE html>
-    <html lang="en"${themeAttr}>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Not200 - Ooops! Something went wrong!</title>
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
-      <link rel="stylesheet" href="/styles.css">
-    </head>
-    <body>
-        <div class="space-stars"></div>
-        <div class="space-stars2"></div>
-        <div class="space-stars3"></div>
-        <div class="space-planet"></div>
-      </div>
-      <div class="container">
-        <div class="titlebar">
-          <div class="left">
-            <div class="traffic">
-              <span class="dot red"></span>
-              <span class="dot yellow"></span>
-              <span class="dot green"></span>
-            </div>
-            <div class="title">Status Code Explorer</div>
-          </div>
-          <label for="themeSelect" class="title" style="margin-left:auto;margin-right:8px;">Theme</label>
-          <select id="themeSelect" class="theme-select" aria-label="Select theme">
-            <option value="current">Current (IDE)</option>
-            <option value="space" selected>Space</option>
-            <option value="outdoors">Outdoors</option>
-          </select>
-        </div>
-
-        <div class="tabs">
-          <div class="tab active">README.md</div>
-          <div class="tab">status.ts</div>
-        </div>
-
-        <div class="content">
-          <div class="heading">HTTP Status Playground</div>
-          <div class="sub">Enter a status code below or try one of the quick links.</div>
-          <div class="quick-grid">
-            <a class="quick" href="/200">200 <span>✅</span></a>
-            <a class="quick" href="/201">201 <span>✨</span></a>
-            <a class="quick" href="/204">204 <span>➖</span></a>
-            <a class="quick" href="/400">400 <span>❌</span></a>
-            <a class="quick" href="/401">401 <span>🔑</span></a>
-            <a class="quick" href="/403">403 <span>🚫</span></a>
-            <a class="quick" href="/404">404 <span>🔍</span></a>
-            <a class="quick" href="/418">418 <span>☕</span></a>
-            <a class="quick" href="/429">429 <span>🐌</span></a>
-            <a class="quick" href="/500">500 <span>💥</span></a>
-            <a class="quick" href="/502">502 <span>🔌</span></a>
-            <a class="quick" href="/503">503 <span>🚧</span></a>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="hint">Jump to a code</div>
-          <form id="statusForm" class="code-input">
-            <input type="number" name="code" placeholder="Enter status code (100-599)" min="100" max="599" required>
-            <button type="submit">Go</button>
-          </form>
-        </div>
-
-        <div class="footer">Powered by Cloudflare Workers</div>
-      </div>
-
-      <script src="/home.js" defer></script>
-      <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
-    </body>
-    </html>
-    ` : (theme === "outdoors" ? `
-    <!DOCTYPE html>
-    <html lang="en"${themeAttr}>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Not200 - Ooops! Something went wrong!</title>
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
-      <link rel="stylesheet" href="/styles.css">
-    </head>
-    <body>
-      <div class="outdoor-bg">
-        <div class="outdoor-sky"></div>
-        <div class="outdoor-sun"></div>
-        <div class="outdoor-mountains"></div>
-        <div class="outdoor-foreground"></div>
-      </div>
-      <div class="container">
-        <div class="titlebar">
-          <div class="left">
-            <div class="traffic">
-              <span class="dot red"></span>
-              <span class="dot yellow"></span>
-              <span class="dot green"></span>
-            </div>
-            <div class="title">Status Code Explorer</div>
-          </div>
-          <label for="themeSelect" class="title" style="margin-left:auto;margin-right:8px;">Theme</label>
-          <select id="themeSelect" class="theme-select" aria-label="Select theme">
-            <option value="current">Current (IDE)</option>
-            <option value="space">Space</option>
-            <option value="outdoors" selected>Outdoors</option>
-          </select>
-        </div>
-
-        <div class="tabs">
-          <div class="tab active">README.md</div>
-          <div class="tab">status.ts</div>
-        </div>
-
-        <div class="content">
-          <div class="heading">HTTP Status Playground</div>
-          <div class="sub">Enter a status code below or try one of the quick links.</div>
-          <div class="quick-grid">
-            <a class="quick" href="/200">200 <span>✅</span></a>
-            <a class="quick" href="/201">201 <span>✨</span></a>
-            <a class="quick" href="/204">204 <span>➖</span></a>
-            <a class="quick" href="/400">400 <span>❌</span></a>
-            <a class="quick" href="/401">401 <span>🔑</span></a>
-            <a class="quick" href="/403">403 <span>🚫</span></a>
-            <a class="quick" href="/404">404 <span>🔍</span></a>
-            <a class="quick" href="/418">418 <span>☕</span></a>
-            <a class="quick" href="/429">429 <span>🐌</span></a>
-            <a class="quick" href="/500">500 <span>💥</span></a>
-            <a class="quick" href="/502">502 <span>🔌</span></a>
-            <a class="quick" href="/503">503 <span>🚧</span></a>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="hint">Jump to a code</div>
-          <form id="statusForm" class="code-input">
-            <input type="number" name="code" placeholder="Enter status code (100-599)" min="100" max="599" required>
-            <button type="submit">Go</button>
-          </form>
-        </div>
-
-        <div class="footer">Powered by Cloudflare Workers</div>
-      </div>
-
-      <script src="/home.js" defer></script>
-      <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
-    </body>
-    </html>
-    ` : `
+  const html = `
     <!DOCTYPE html>
     <html lang="en"${themeAttr}>
     <head>
@@ -240,7 +122,7 @@ function renderHomePage(theme?: Theme): Response {
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
     </body>
     </html>
-  `));
+  `;
 
   return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
 }
@@ -288,6 +170,7 @@ function createHTMLResponse(
             ${emailSafe ? `Email: ${escapeHtml(emailSafe)}<br>` : ''}
             ${raySafe ? `Ray ID: ${escapeHtml(raySafe)}` : ''}
           </div>
+          ${emailSafe ? `<div class="actions" style="margin-top:12px;"><button id="reportBtn" class="report-btn">Report</button></div>` : ''}
         </div>
       </section>
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
@@ -325,6 +208,7 @@ function createHTMLResponse(
             ${emailSafe ? `Email: ${escapeHtml(emailSafe)}<br>` : ''}
             ${raySafe ? `Ray ID: ${escapeHtml(raySafe)}` : ''}
           </div>
+          ${emailSafe ? `<div class="actions" style="margin-top:12px;"><button id=\"reportBtn\" class=\"report-btn\">Report</button></div>` : ''}
         </div>
       </section>
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
@@ -403,6 +287,7 @@ function createHTMLResponse(
             <button type="submit">Go</button>
           </form>
         </div>
+        ${emailSafe ? `<div class="actions" style="padding:12px 16px; border-top: 1px solid #1f2a44;"><button id=\"reportBtn\" class=\"report-btn\">Report</button></div>` : ''}
         <div class="footer">Powered by Cloudflare Workers · Status ${statusInfo.code} ${statusInfo.name}</div>
       </div>
       
@@ -435,6 +320,43 @@ export default {
     if (request.method === 'GET' && (path === 'styles.css' || path === 'home.js' || path === 'status.js')) {
       // @ts-ignore - ASSETS is provided by Wrangler binding
       return env.ASSETS.fetch(request);
+    }
+
+    // Handle report endpoint
+    if (request.method === 'POST' && path === 'report') {
+      try {
+        const emailHeader = request.headers.get('x-user-email');
+        if (!emailHeader) {
+          return new Response(JSON.stringify({ error: 'Missing x-user-email header' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        const refHeader = request.headers.get('referer') || request.headers.get('referrer') || '';
+        const rayId = request.headers.get('cf-ray') || request.headers.get('source-cf-ray-id') || '';
+
+        let codeFromPath: number | undefined;
+        const p = url.pathname.slice(1);
+        const n = parseInt(p, 10);
+        if (!isNaN(n)) codeFromPath = n;
+
+        let codeFromBody: number | undefined;
+        try {
+          const body = await request.json<any>();
+          if (body && typeof body.code === 'number') codeFromBody = body.code;
+        } catch {}
+
+        const code = codeFromBody ?? codeFromPath ?? 0;
+        const ts = formatUtcTimestamp(new Date());
+        const subject = `Not200 Report: ${code || 'N/A'}`;
+        const text = `Status Code: ${code || 'N/A'}\nTimestamp: ${ts}\nCF-Ray-ID: ${rayId || 'N/A'}\nReferrer: ${refHeader || 'N/A'}`;
+
+        const mailRes = await sendReportEmail(emailHeader, subject, text);
+        if (!mailRes.ok) {
+          const msg = await mailRes.text();
+          return new Response(JSON.stringify({ ok: false, error: msg }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+        }
+        return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      } catch (e: any) {
+        return new Response(JSON.stringify({ error: e?.message || 'Unknown error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      }
     }
     
     // Handle root path -> Show styled homepage
