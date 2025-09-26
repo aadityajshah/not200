@@ -125,8 +125,8 @@ button:hover { background: #1d4ed8; }
 .footer { padding: 10px 14px; color: #64748b; background: #0a1222; border-top: 1px solid #1f2a44; font-size: 12px; text-align: right; }
 
 /* Editor-like status page sections */
-.editor { display: grid; grid-template-columns: auto 1fr; gap: 0; background: #0f172a; }
-.gutter { user-select: none; padding: 14px 12px; text-align: right; color: #4b5563; background: #0a1222; border-right: 1px solid #1f2a44; line-height: 1.8; min-width: 44px; }
+.editor { display: grid; grid-template-columns: auto 1fr; gap: 0; }
+.gutter { user-select: none; padding: 14px 12px; text-align: right; color: #4b5563; border-right: 1px solid #1f2a44; line-height: 1.8; min-width: 44px; }
 .code { padding: 14px 16px; overflow-x: auto; white-space: pre; font-size: 14px; line-height: 1.8; }
 
 /* Syntax colors */
