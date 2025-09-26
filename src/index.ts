@@ -92,9 +92,6 @@ function renderHomePage(theme?: Theme): Response {
           <div class="heading">HTTP Status Playground</div>
           <div class="sub">Enter a status code below or try one of the quick links.</div>
           <div class="quick-grid">
-            <a class="quick" href="/200">200 <span>✅</span></a>
-            <a class="quick" href="/201">201 <span>✨</span></a>
-            <a class="quick" href="/204">204 <span>➖</span></a>
             <a class="quick" href="/400">400 <span>❌</span></a>
             <a class="quick" href="/401">401 <span>🔑</span></a>
             <a class="quick" href="/403">403 <span>🚫</span></a>
@@ -110,7 +107,7 @@ function renderHomePage(theme?: Theme): Response {
         <div class="panel">
           <div class="hint">Jump to a code</div>
           <form id="statusForm" class="code-input">
-            <input type="number" name="code" placeholder="Enter status code (100-599)" min="100" max="599" required>
+            <input type="number" name="code" placeholder="Enter error status code (400-599)" min="100" max="599" required>
             <button type="submit">Go</button>
           </form>
         </div>

@@ -6,26 +6,6 @@ export type StatusCodeInfo = {
   };
   
   const CODES: Record<number, StatusCodeInfo> = {
-    200: {
-      code: 200,
-      name: 'OK',
-      description: 'The request has succeeded.',
-      emoji: '✅',
-    },
-    201: {
-      code: 201,
-      name: 'Created',
-      description:
-        'The request has been fulfilled and has resulted in one or more new resources being created.',
-      emoji: '✨',
-    },
-    204: {
-      code: 204,
-      name: 'No Content',
-      description:
-        'The server successfully processed the request and is not returning any content.',
-      emoji: '➖',
-    },
     400: {
       code: 400,
       name: 'Bad Request',
