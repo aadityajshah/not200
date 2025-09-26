@@ -121,7 +121,7 @@ function renderHomePage(): Response {
           </form>
         </div>
 
-        <div class="footer">Powered by <img src="/workers.webp" height="16px" style="padding:3px">Cloudflare Workers</div>
+        <div class="footer">Powered by Cloudflare Workers</div>
       </div>
 
       <script>
@@ -241,8 +241,15 @@ function getStatusInfo(statusCode: number): StatusCodeInfo {
   };
 }
 
-function createHTMLResponse(statusInfo: StatusCodeInfo, referrer?: string | null): Response {
+function createHTMLResponse(
+  statusInfo: StatusCodeInfo,
+  referrer?: string | null,
+  email?: string | null,
+  sourceCfRayId?: string | null,
+): Response {
   const ref = referrer && referrer.trim().length ? referrer : null;
+  const emailSafe = email && email.trim().length ? email : null;
+  const raySafe = sourceCfRayId && sourceCfRayId.trim().length ? sourceCfRayId : null;
   const html = `
     <!DOCTYPE html>
     <html lang="en">
@@ -447,16 +454,18 @@ function createHTMLResponse(statusInfo: StatusCodeInfo, referrer?: string | null
 <span class="tok-kw">type</span> <span class="tok-type">Status</span> <span class="tok-punc">=</span> <span class="tok-punc">{</span> <span class="tok-prop">code</span><span class="tok-punc">:</span> <span class="tok-type">number</span><span class="tok-punc">;</span> <span class="tok-prop">name</span><span class="tok-punc">:</span> <span class="tok-type">string</span><span class="tok-punc">;</span> <span class="tok-prop">description</span><span class="tok-punc">:</span> <span class="tok-type">string</span> <span class="tok-punc">}</span>
 
 <span class="tok-kw">const</span> <span class="tok-var">status</span><span class="tok-punc">:</span> <span class="tok-type">Status</span> <span class="tok-punc">=</span> <span class="tok-punc">{</span>
+  <span class="tok-prop">emoji</span><span class="tok-punc">:</span> <span class="tok-str">"${statusInfo.emoji}"</span>
   <span class="tok-prop">code</span><span class="tok-punc">:</span> <span class="tok-num">${statusInfo.code}</span><span class="tok-punc">,</span>
   <span class="tok-prop">name</span><span class="tok-punc">:</span> <span class="tok-str">"${statusInfo.name}"</span><span class="tok-punc">,</span>
   <span class="tok-prop">description</span><span class="tok-punc">:</span> <span class="tok-str">"${statusInfo.description}"</span><span class="tok-punc">,</span>
   ${ref ? `<span class="tok-prop">referrer</span><span class="tok-punc">:</span> <span class="tok-str">"${escapeHtml(ref)}"</span><span class="tok-punc">,</span>` : ''}
-  <span class="tok-prop">emoji</span><span class="tok-punc">:</span> <span class="tok-str">"${statusInfo.emoji}"</span>
+  ${emailSafe ? `<span class="tok-prop">email</span><span class="tok-punc">:</span> <span class="tok-str">"${escapeHtml(emailSafe)}"</span><span class="tok-punc">,</span>` : ''}
+  ${raySafe ? `<span class="tok-prop">sourceCfRayId</span><span class="tok-punc">:</span> <span class="tok-str">"${escapeHtml(raySafe)}"</span><span class="tok-punc">,</span>` : ''}
 <span class="tok-punc">}</span>
 
 <span class="tok-cmt">// Tip: change the code below and hit Go</span>
           </code></pre>
-        </div>
+{{ ... }}
 
         <div class="panel">
           <div class="hint">Open Command Palette: enter a status code</div>
@@ -525,6 +534,9 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname.slice(1); // Remove leading slash
+    const ref = request.headers.get('referer') || request.headers.get('referrer');
+    const email = request.headers.get('x-user-email');
+    const sourceCfRayId = request.headers.get('source-cf-ray-id');
     
     // Handle root path -> Show styled homepage
     if (path === '') {
@@ -535,8 +547,7 @@ export default {
     const statusCode = parseInt(path, 10);
     if (!isNaN(statusCode) && statusCode >= 100 && statusCode <= 599) {
       const statusInfo = getStatusInfo(statusCode);
-      const ref = request.headers.get('referer') || request.headers.get('referrer');
-      return createHTMLResponse(statusInfo, ref);
+      return createHTMLResponse(statusInfo, ref, email, sourceCfRayId);
     }
     
     // Handle API endpoint
@@ -557,9 +568,14 @@ export default {
       }
       
       const statusInfo = getStatusInfo(statusCode);
-      
+      const payload = {
+        ...statusInfo,
+        ...(email ? { email } : {}),
+        ...(sourceCfRayId ? { sourceCfRayId: sourceCfRayId } : {}),
+      };
+
       return new Response(
-        JSON.stringify(statusInfo),
+        JSON.stringify(payload),
         { 
           status: statusCode,
           headers: { 'Content-Type': 'application/json' } 
@@ -568,6 +584,6 @@ export default {
     }
     
     // 404 for any other routes
-    return createHTMLResponse(getStatusInfo(404), request.headers.get('referer') || request.headers.get('referrer'));
+    return createHTMLResponse(getStatusInfo(404), ref, email, sourceCfRayId);
   },
 } satisfies ExportedHandler<Env>;
