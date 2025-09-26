@@ -1,9 +1,12 @@
+import { getStatusInfo } from './status-codes';
 interface StatusCodeInfo {
   code: number;
   name: string;
   description: string;
   emoji: string;
 }
+
+type Theme = 'current' | 'space' | 'outdoors';
 
 function escapeHtml(input: string): string {
   return input
@@ -14,68 +17,26 @@ function escapeHtml(input: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function renderHomePage(): Response {
-  const html = `
+function renderHomePage(theme?: Theme): Response {
+  const themeAttr = theme && theme !== 'current' ? ` data-theme="${theme}"` : '';
+  const html = (theme === "space" ? `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="en"${themeAttr}>
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>not200 - Something went wrong! </title>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap');
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-          font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-          background: #0b1220; color: #e5e7eb; min-height: 100vh;
-          display: flex; align-items: center; justify-content: center; padding: 24px;
-        }
-
-        .container { width: min(920px, 100%); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,.5); border: 1px solid #1f2a44; background: #0f172a; }
-        .titlebar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: #0a1222; border-bottom: 1px solid #1f2a44; }
-        .left { display: flex; align-items: center; gap: 12px; }
-        .traffic { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.red { background: #ff5f57; } .dot.yellow { background: #febc2e; } .dot.green { background: #28c840; }
-        .title { color: #9aa7bd; font-weight: 600; }
-        .theme-btn { background: #0f172a; color: #cbd5e1; border: 1px solid #1f2a44; padding: 6px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-        .theme-btn:hover { background: #111a31; }
-
-        .tabs { display: flex; gap: 8px; padding: 8px 12px 0 12px; background: #0f172a; border-bottom: 1px solid #1f2a44; }
-        .tab { padding: 8px 12px; border-top-left-radius: 6px; border-top-right-radius: 6px; background: #0a1222; color: #8aa0b6; border: 1px solid #1f2a44; border-bottom: none; }
-        .tab.active { background: #0f172a; color: #e5e7eb; }
-
-        .content { padding: 20px 16px 8px 16px; }
-        .heading { font-size: 18px; color: #e5e7eb; margin-bottom: 8px; }
-        .sub { color: #9aa7bd; margin-bottom: 16px; }
-
-        .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 8px; }
-        .quick { background: #0a1222; border: 1px solid #1f2a44; border-radius: 8px; padding: 10px 12px; color: #cbd5e1; text-decoration: none; display: flex; justify-content: space-between; align-items: center; }
-        .quick:hover { background: #111a31; border-color: #2b395e; }
-
-        .panel { border-top: 1px solid #1f2a44; background: #0a1222; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .panel .hint { color: #8aa0b6; font-size: 12px; }
-        .code-input { display: flex; gap: 8px; }
-        input[type="number"] { background: #0f172a; border: 1px solid #1f2a44; color: #e5e7eb; padding: 8px 12px; border-radius: 6px; width: 200px; }
-        button { background: #2563eb; color: white; border: 1px solid #1d4ed8; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-        button:hover { background: #1d4ed8; }
-        .footer { padding: 10px 14px; color: #64748b; background: #0a1222; border-top: 1px solid #1f2a44; font-size: 12px; text-align: right; }
-
-        /* Light theme */
-        [data-theme="light"] body { background: #f3f4f6; color: #0f172a; }
-        [data-theme="light"] .container { background: #ffffff; border-color: #e5e7eb; }
-        [data-theme="light"] .titlebar { background: #f8fafc; border-color: #e5e7eb; }
-        [data-theme="light"] .tabs { background: #ffffff; border-color: #e5e7eb; }
-        [data-theme="light"] .tab { background: #f8fafc; color: #475569; border-color: #e5e7eb; }
-        [data-theme="light"] .tab.active { background: #ffffff; color: #0f172a; }
-        [data-theme="light"] .panel { background: #f8fafc; border-color: #e5e7eb; }
-        [data-theme="light"] input[type="number"] { background: #ffffff; color: #0f172a; border-color: #e5e7eb; }
-        [data-theme="light"] .footer { background: #f8fafc; border-color: #e5e7eb; color: #475569; }
-      </style>
+      <title>Not200 - Ooops! Something went wrong!</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="/styles.css">
     </head>
     <body>
+        <div class="space-stars"></div>
+        <div class="space-stars2"></div>
+        <div class="space-stars3"></div>
+        <div class="space-planet"></div>
+      </div>
       <div class="container">
         <div class="titlebar">
           <div class="left">
@@ -84,9 +45,14 @@ function renderHomePage(): Response {
               <span class="dot yellow"></span>
               <span class="dot green"></span>
             </div>
-            <div class="title">not200 - Something went wrong! </div>
+            <div class="title">Status Code Explorer</div>
           </div>
-          <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">🌙 Dark</button>
+          <label for="themeSelect" class="title" style="margin-left:auto;margin-right:8px;">Theme</label>
+          <select id="themeSelect" class="theme-select" aria-label="Select theme">
+            <option value="current">Current (IDE)</option>
+            <option value="space" selected>Space</option>
+            <option value="outdoors">Outdoors</option>
+          </select>
         </div>
 
         <div class="tabs">
@@ -96,8 +62,11 @@ function renderHomePage(): Response {
 
         <div class="content">
           <div class="heading">HTTP Status Playground</div>
-          <div class="sub">Try one of the quick links.</div>
+          <div class="sub">Enter a status code below or try one of the quick links.</div>
           <div class="quick-grid">
+            <a class="quick" href="/200">200 <span>✅</span></a>
+            <a class="quick" href="/201">201 <span>✨</span></a>
+            <a class="quick" href="/204">204 <span>➖</span></a>
             <a class="quick" href="/400">400 <span>❌</span></a>
             <a class="quick" href="/401">401 <span>🔑</span></a>
             <a class="quick" href="/403">403 <span>🚫</span></a>
@@ -110,294 +79,270 @@ function renderHomePage(): Response {
           </div>
         </div>
 
+        <div class="panel">
+          <div class="hint">Jump to a code</div>
+          <form id="statusForm" class="code-input">
+            <input type="number" name="code" placeholder="Enter status code (100-599)" min="100" max="599" required>
+            <button type="submit">Go</button>
+          </form>
+        </div>
+
         <div class="footer">Powered by Cloudflare Workers</div>
       </div>
 
-      <script>
-        (function() {
-          const root = document.documentElement;
-          const btn = document.getElementById('themeToggle');
-          const saved = localStorage.getItem('theme');
-          if (saved === 'light') { root.setAttribute('data-theme', 'light'); btn.textContent = '🌞 Light'; }
-          else { root.removeAttribute('data-theme'); btn.textContent = '🌙 Dark'; }
-          btn?.addEventListener('click', () => {
-            const isLight = root.getAttribute('data-theme') === 'light';
-            if (isLight) { root.removeAttribute('data-theme'); localStorage.removeItem('theme'); btn.textContent = '🌙 Dark'; }
-            else { root.setAttribute('data-theme', 'light'); localStorage.setItem('theme', 'light'); btn.textContent = '🌞 Light'; }
-          });
-        })();
-
-        document.getElementById('statusForm').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const code = e.target.elements.code.value;
-          window.location.href = '/' + code;
-        });
-      </script>
+      <script src="/home.js" defer></script>
+      <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
     </body>
     </html>
-  `;
+    ` : (theme === "outdoors" ? `
+    <!DOCTYPE html>
+    <html lang="en"${themeAttr}>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Not200 - Ooops! Something went wrong!</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="/styles.css">
+    </head>
+    <body>
+      <div class="outdoor-bg">
+        <div class="outdoor-sky"></div>
+        <div class="outdoor-sun"></div>
+        <div class="outdoor-mountains"></div>
+        <div class="outdoor-foreground"></div>
+      </div>
+      <div class="container">
+        <div class="titlebar">
+          <div class="left">
+            <div class="traffic">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="title">Status Code Explorer</div>
+          </div>
+          <label for="themeSelect" class="title" style="margin-left:auto;margin-right:8px;">Theme</label>
+          <select id="themeSelect" class="theme-select" aria-label="Select theme">
+            <option value="current">Current (IDE)</option>
+            <option value="space">Space</option>
+            <option value="outdoors" selected>Outdoors</option>
+          </select>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active">README.md</div>
+          <div class="tab">status.ts</div>
+        </div>
+
+        <div class="content">
+          <div class="heading">HTTP Status Playground</div>
+          <div class="sub">Enter a status code below or try one of the quick links.</div>
+          <div class="quick-grid">
+            <a class="quick" href="/200">200 <span>✅</span></a>
+            <a class="quick" href="/201">201 <span>✨</span></a>
+            <a class="quick" href="/204">204 <span>➖</span></a>
+            <a class="quick" href="/400">400 <span>❌</span></a>
+            <a class="quick" href="/401">401 <span>🔑</span></a>
+            <a class="quick" href="/403">403 <span>🚫</span></a>
+            <a class="quick" href="/404">404 <span>🔍</span></a>
+            <a class="quick" href="/418">418 <span>☕</span></a>
+            <a class="quick" href="/429">429 <span>🐌</span></a>
+            <a class="quick" href="/500">500 <span>💥</span></a>
+            <a class="quick" href="/502">502 <span>🔌</span></a>
+            <a class="quick" href="/503">503 <span>🚧</span></a>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="hint">Jump to a code</div>
+          <form id="statusForm" class="code-input">
+            <input type="number" name="code" placeholder="Enter status code (100-599)" min="100" max="599" required>
+            <button type="submit">Go</button>
+          </form>
+        </div>
+
+        <div class="footer">Powered by Cloudflare Workers</div>
+      </div>
+
+      <script src="/home.js" defer></script>
+      <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
+    </body>
+    </html>
+    ` : `
+    <!DOCTYPE html>
+    <html lang="en"${themeAttr}>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Not200 - Ooops! Something went wrong!</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="/styles.css">
+    </head>
+    <body>
+      <div class="container">
+        <div class="titlebar">
+          <div class="left">
+            <div class="traffic">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="title">Status Code Explorer</div>
+          </div>
+          <label for="themeSelect" class="title" style="margin-left:auto;margin-right:8px;">Theme</label>
+          <select id="themeSelect" class="theme-select" aria-label="Select theme">
+            <option value="current">Current (IDE)</option>
+            <option value="space">Space</option>
+            <option value="outdoors">Outdoors</option>
+          </select>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active">README.md</div>
+          <div class="tab">status.ts</div>
+        </div>
+
+        <div class="content">
+          <div class="heading">HTTP Status Playground</div>
+          <div class="sub">Enter a status code below or try one of the quick links.</div>
+          <div class="quick-grid">
+            <a class="quick" href="/200">200 <span>✅</span></a>
+            <a class="quick" href="/201">201 <span>✨</span></a>
+            <a class="quick" href="/204">204 <span>➖</span></a>
+            <a class="quick" href="/400">400 <span>❌</span></a>
+            <a class="quick" href="/401">401 <span>🔑</span></a>
+            <a class="quick" href="/403">403 <span>🚫</span></a>
+            <a class="quick" href="/404">404 <span>🔍</span></a>
+            <a class="quick" href="/418">418 <span>☕</span></a>
+            <a class="quick" href="/429">429 <span>🐌</span></a>
+            <a class="quick" href="/500">500 <span>💥</span></a>
+            <a class="quick" href="/502">502 <span>🔌</span></a>
+            <a class="quick" href="/503">503 <span>🚧</span></a>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="hint">Jump to a code</div>
+          <form id="statusForm" class="code-input">
+            <input type="number" name="code" placeholder="Enter status code (100-599)" min="100" max="599" required>
+            <button type="submit">Go</button>
+          </form>
+        </div>
+
+        <div class="footer">Powered by Cloudflare Workers</div>
+      </div>
+
+      <script src="/home.js" defer></script>
+      <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
+    </body>
+    </html>
+  `));
 
   return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
 }
 
-const statusCodes: Record<number, StatusCodeInfo> = {
-  400: {
-    code: 400,
-    name: 'Bad Request',
-    description: 'The server cannot process the request due to something that is perceived to be a client error.',
-    emoji: '❌',
-  },
-  401: {
-    code: 401,
-    name: 'Unauthorized',
-    description: 'The request has not been applied because it lacks valid authentication credentials.',
-    emoji: '🔑',
-  },
-  403: {
-    code: 403,
-    name: 'Forbidden',
-    description: 'The server understood the request but refuses to authorize it.',
-    emoji: '🚫',
-  },
-  404: {
-    code: 404,
-    name: 'Not Found',
-    description: 'The server cannot find the requested resource.',
-    emoji: '🔍',
-  },
-  418: {
-    code: 418,
-    name: "I'm a teapot",
-    description: 'The server refuses the attempt to brew coffee with a teapot.',
-    emoji: '☕',
-  },
-  429: {
-    code: 429,
-    name: 'Too Many Requests',
-    description: 'The user has sent too many requests in a given amount of time.',
-    emoji: '🐌',
-  },
-  500: {
-    code: 500,
-    name: 'Internal Server Error',
-    description: 'The server encountered an unexpected condition that prevented it from fulfilling the request.',
-    emoji: '💥',
-  },
-  502: {
-    code: 502,
-    name: 'Bad Gateway',
-    description: 'The server, while acting as a gateway or proxy, received an invalid response from an inbound server it accessed.',
-    emoji: '🔌',
-  },
-  503: {
-    code: 503,
-    name: 'Service Unavailable',
-    description: 'The server is not ready to handle the request.',
-    emoji: '🚧',
-  },
-  504: {
-    code: 504,
-    name: 'Gateway Timeout',
-    description: 'The server, while acting as a gateway or proxy, did not receive a timely response from an upstream server.',
-    emoji: '⏱️',
-  },
-};
 
-function getStatusInfo(statusCode: number): StatusCodeInfo {
-  return statusCodes[statusCode as keyof typeof statusCodes] || {
-    code: statusCode,
-    name: 'Unknown Status',
-    description: 'This status code is not in our database.',
-    emoji: '❓',
-  };
-}
 
 function createHTMLResponse(
   statusInfo: StatusCodeInfo,
   referrer?: string | null,
   email?: string | null,
   sourceCfRayId?: string | null,
+  theme?: Theme,
 ): Response {
   const ref = referrer && referrer.trim().length ? referrer : null;
   const emailSafe = email && email.trim().length ? email : null;
   const raySafe = sourceCfRayId && sourceCfRayId.trim().length ? sourceCfRayId : null;
-  const html = `
+  const themeAttr = theme && theme !== 'current' ? ` data-theme="${theme}"` : '';
+  const html = theme === "space"
+    ? `
     <!DOCTYPE html>
-    <html lang="en">
+    <html lang="en"${themeAttr}>
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${statusInfo.code} ${statusInfo.name}</title>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap');
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-          font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-          background: #0b1220; /* editor background */
-          color: #e5e7eb;
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 24px;
-        }
-
-        .container {
-          width: min(920px, 100%);
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-          border: 1px solid #1f2a44;
-          background: #0f172a; /* panel */
-        }
-
-        .titlebar {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px 14px;
-          background: #0a1222;
-          border-bottom: 1px solid #1f2a44;
-        }
-
-        .traffic { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.red { background: #ff5f57; }
-        .dot.yellow { background: #febc2e; }
-        .dot.green { background: #28c840; }
-        .title { color: #9aa7bd; font-weight: 600; }
-
-        .tabs {
-          display: flex;
-          gap: 8px;
-          padding: 8px 12px 0 12px;
-          background: #0f172a;
-          border-bottom: 1px solid #1f2a44;
-        }
-
-        .tab {
-          padding: 8px 12px;
-          border-top-left-radius: 6px;
-          border-top-right-radius: 6px;
-          background: #0a1222;
-          color: #8aa0b6;
-          border: 1px solid #1f2a44;
-          border-bottom: none;
-        }
-        .tab.active { background: #0f172a; color: #e5e7eb; }
-
-        .editor {
-          display: grid;
-          grid-template-columns: auto 1fr;
-          gap: 0;
-          background: #0f172a;
-        }
-
-        .gutter {
-          user-select: none;
-          padding: 14px 12px;
-          text-align: right;
-          color: #4b5563;
-          background: #0a1222;
-          border-right: 1px solid #1f2a44;
-          line-height: 1.8;
-          min-width: 44px;
-        }
-
-        .code {
-          padding: 14px 16px;
-          overflow-x: auto;
-          white-space: pre;
-          font-size: 14px;
-          line-height: 1.8;
-        }
-
-        /* Syntax colors (inspired by VSCode Dark+) */
-        .tok-kw { color: #c792ea; }          /* keywords */
-        .tok-type { color: #82aaff; }        /* types */
-        .tok-var { color: #f78c6c; }         /* variables */
-        .tok-prop { color: #addb67; }        /* property */
-        .tok-num { color: #f78c6c; }         /* numbers */
-        .tok-str { color: #ecc48d; }         /* strings */
-        .tok-punc { color: #89ddff; }        /* punctuation */
-        .tok-cmt { color: #646e82; font-style: italic; } /* comments */
-
-        .panel {
-          border-top: 1px solid #1f2a44;
-          background: #0a1222;
-          padding: 16px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-
-        .panel .hint { color: #8aa0b6; font-size: 12px; }
-
-        .code-input { display: flex; gap: 8px; }
-        input[type="number"] {
-          background: #0f172a;
-          border: 1px solid #1f2a44;
-          color: #e5e7eb;
-          padding: 8px 12px;
-          border-radius: 6px;
-          width: 160px;
-        }
-
-        button {
-          background: #2563eb;
-          color: white;
-          border: 1px solid #1d4ed8;
-          padding: 8px 14px;
-          border-radius: 6px;
-          font-weight: 600;
-          cursor: pointer;
-        }
-        button:hover { background: #1d4ed8; }
-
-        .footer {
-          padding: 10px 14px;
-          color: #64748b;
-          background: #0a1222;
-          border-top: 1px solid #1f2a44;
-          font-size: 12px;
-          text-align: right;
-        }
-        /* Titlebar spacer and theme button */
-        .titlebar { justify-content: space-between; }
-        .titlebar .left { display: flex; align-items: center; gap: 12px; }
-        .spacer { flex: 1; }
-        .theme-btn {
-          background: #0f172a;
-          color: #cbd5e1;
-          border: 1px solid #1f2a44;
-          padding: 6px 10px;
-          border-radius: 6px;
-          font-weight: 600;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-        }
-        .theme-btn:hover { background: #111a31; }
-
-        /* Light theme overrides */
-        [data-theme="light"] body { background: #f3f4f6; color: #0f172a; }
-        [data-theme="light"] .container { background: #ffffff; border-color: #e5e7eb; }
-        [data-theme="light"] .titlebar { background: #f8fafc; border-color: #e5e7eb; }
-        [data-theme="light"] .tabs { background: #ffffff; border-color: #e5e7eb; }
-        [data-theme="light"] .tab { background: #f8fafc; color: #475569; border-color: #e5e7eb; }
-        [data-theme="light"] .tab.active { background: #ffffff; color: #0f172a; }
-        [data-theme="light"] .gutter { background: #f8fafc; color: #94a3b8; border-color: #e5e7eb; }
-        [data-theme="light"] .code { color: #0f172a; }
-        [data-theme="light"] .panel { background: #f8fafc; border-color: #e5e7eb; }
-        [data-theme="light"] input[type="number"] { background: #ffffff; color: #0f172a; border-color: #e5e7eb; }
-        [data-theme="light"] button { background: #2563eb; }
-        [data-theme="light"] .footer { background: #f8fafc; border-color: #e5e7eb; color: #475569; }
-      </style>
+      <title>Not200 - Ooops! Something went wrong!</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="/styles.css">
+    </head>
+    <body>
+      <div class="space-bg">
+        <div class="space-stars"></div>
+        <div class="space-stars2"></div>
+        <div class="space-stars3"></div>
+        <div class="space-planet"></div>
+      </div>
+      <section class="space-status">
+        <div class="block">
+          <div class="eyebrow">${statusInfo.emoji} ${statusInfo.code} ${statusInfo.name}</div>
+          <h1>${statusInfo.code} ${statusInfo.name}</h1>
+          <p>${statusInfo.description}</p>
+          <div class="meta">
+            ${ref ? `Referrer: ${escapeHtml(ref)}<br>` : ''}
+            ${emailSafe ? `Email: ${escapeHtml(emailSafe)}<br>` : ''}
+            ${raySafe ? `Ray ID: ${escapeHtml(raySafe)}` : ''}
+          </div>
+        </div>
+      </section>
+      <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
+      <script src="/status.js" defer></script>
+    </body>
+    </html>
+    `
+    : theme === "outdoors"
+    ? `
+    <!DOCTYPE html>
+    <html lang="en"${themeAttr}>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Not200 - Ooops! Something went wrong!</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="/styles.css">
+    </head>
+    <body>
+      <div class="outdoor-bg">
+        <div class="outdoor-sky"></div>
+        <div class="outdoor-sun"></div>
+        <div class="outdoor-mountains"></div>
+        <div class="outdoor-foreground"></div>
+      </div>
+      <section class="outdoor-status">
+        <div class="block">
+          <div class="eyebrow">${statusInfo.emoji} ${statusInfo.code} ${statusInfo.name}</div>
+          <h1>${statusInfo.code} ${statusInfo.name}</h1>
+          <p>${statusInfo.description}</p>
+          <div class="meta">
+            ${ref ? `Referrer: ${escapeHtml(ref)}<br>` : ''}
+            ${emailSafe ? `Email: ${escapeHtml(emailSafe)}<br>` : ''}
+            ${raySafe ? `Ray ID: ${escapeHtml(raySafe)}` : ''}
+          </div>
+        </div>
+      </section>
+      <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
+      <script src="/status.js" defer></script>
+    </body>
+    </html>
+    `
+    : `
+    <!DOCTYPE html>
+    <html lang="en"${themeAttr}>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Not200 - Ooops! Something went wrong!</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="/styles.css">
     </head>
     <body>
       <div class="container">
@@ -410,7 +355,12 @@ function createHTMLResponse(
             </div>
             <div class="title">status.ts</div>
           </div>
-          <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">🌙 Dark</button>
+          <label for="themeSelect" class="theme-btn" style="background:transparent;border:none;color:inherit;">Theme</label>
+          <select id="themeSelect" class="theme-btn" aria-label="Select theme">
+            <option value="current">Current (IDE)</option>
+            <option value="space">Space</option>
+            <option value="outdoors">Outdoors</option>
+          </select>
         </div>
 
         <div class="tabs">
@@ -434,46 +384,34 @@ function createHTMLResponse(
   ${raySafe ? `<span class="tok-prop">sourceCfRayId</span><span class="tok-punc">:</span> <span class="tok-str">"${escapeHtml(raySafe)}"</span><span class="tok-punc">,</span>` : ''}
 <span class="tok-punc">}</span>
 
+<span class="tok-cmt">// Tip: change the code below and hit Go</span>
           </code></pre>
+{{ ... }}
 
+        <div class="panel">
+          <div class="hint">Open Command Palette: enter a status code</div>
+          <form id="statusForm" class="code-input">
+            <input 
+              type="number" 
+              name="code" 
+              placeholder="Enter status code (100-599)" 
+              min="100" 
+              max="599"
+              value="${statusInfo.code}"
+              required
+            >
+            <button type="submit">Go</button>
+          </form>
+        </div>
         <div class="footer">Powered by Cloudflare Workers · Status ${statusInfo.code} ${statusInfo.name}</div>
       </div>
       
-      <script>
-        (function() {
-          const root = document.documentElement;
-          const btn = document.getElementById('themeToggle');
-          const saved = localStorage.getItem('theme');
-          if (saved === 'light') {
-            root.setAttribute('data-theme', 'light');
-            if (btn) btn.textContent = '🌞 Light';
-          } else {
-            root.removeAttribute('data-theme');
-            if (btn) btn.textContent = '🌙 Dark';
-          }
-          btn?.addEventListener('click', () => {
-            const isLight = root.getAttribute('data-theme') === 'light';
-            if (isLight) {
-              root.removeAttribute('data-theme');
-              localStorage.removeItem('theme');
-              btn.textContent = '🌙 Dark';
-            } else {
-              root.setAttribute('data-theme', 'light');
-              localStorage.setItem('theme', 'light');
-              btn.textContent = '🌞 Light';
-            }
-          });
-        })();
-
-        document.getElementById('statusForm').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const code = e.target.elements.code.value;
-          window.location.href = "/" + code;
-        });
-      </script>
+      <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
+      <script src="/status.js" defer></script>
     </body>
     </html>
   `;
+
 
   return new Response(html, {
     status: statusInfo.code,
@@ -490,17 +428,25 @@ export default {
     const ref = request.headers.get('referer') || request.headers.get('referrer');
     const email = request.headers.get('x-user-email');
     const sourceCfRayId = request.headers.get('source-cf-ray-id');
+    const themeParam = (url.searchParams.get('theme') || '').toLowerCase();
+    const theme: Theme | undefined = themeParam === 'space' || themeParam === 'outdoors' || themeParam === 'current' ? (themeParam as Theme) : undefined;
+
+    // Serve static assets
+    if (request.method === 'GET' && (path === 'styles.css' || path === 'home.js' || path === 'status.js')) {
+      // @ts-ignore - ASSETS is provided by Wrangler binding
+      return env.ASSETS.fetch(request);
+    }
     
     // Handle root path -> Show styled homepage
     if (path === '') {
-      return renderHomePage();
+      return renderHomePage(theme);
     }
     
     // Check if the path is a status code
     const statusCode = parseInt(path, 10);
     if (!isNaN(statusCode) && statusCode >= 100 && statusCode <= 599) {
       const statusInfo = getStatusInfo(statusCode);
-      return createHTMLResponse(statusInfo, ref, email, sourceCfRayId);
+      return createHTMLResponse(statusInfo, ref, email, sourceCfRayId, theme);
     }
     
     // Handle API endpoint
@@ -537,6 +483,6 @@ export default {
     }
     
     // 404 for any other routes
-    return createHTMLResponse(getStatusInfo(404), ref, email, sourceCfRayId);
+    return createHTMLResponse(getStatusInfo(404), ref, email, sourceCfRayId, theme);
   },
 } satisfies ExportedHandler<Env>;
