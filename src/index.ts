@@ -21,7 +21,7 @@ function renderHomePage(): Response {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Status Code Explorer</title>
+      <title>not200 - Something went wrong! </title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap');
 
@@ -84,7 +84,7 @@ function renderHomePage(): Response {
               <span class="dot yellow"></span>
               <span class="dot green"></span>
             </div>
-            <div class="title">Status Code Explorer</div>
+            <div class="title">not200 - Something went wrong! </div>
           </div>
           <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">🌙 Dark</button>
         </div>
@@ -96,11 +96,8 @@ function renderHomePage(): Response {
 
         <div class="content">
           <div class="heading">HTTP Status Playground</div>
-          <div class="sub">Enter a status code below or try one of the quick links.</div>
+          <div class="sub">Try one of the quick links.</div>
           <div class="quick-grid">
-            <a class="quick" href="/200">200 <span>✅</span></a>
-            <a class="quick" href="/201">201 <span>✨</span></a>
-            <a class="quick" href="/204">204 <span>➖</span></a>
             <a class="quick" href="/400">400 <span>❌</span></a>
             <a class="quick" href="/401">401 <span>🔑</span></a>
             <a class="quick" href="/403">403 <span>🚫</span></a>
@@ -111,14 +108,6 @@ function renderHomePage(): Response {
             <a class="quick" href="/502">502 <span>🔌</span></a>
             <a class="quick" href="/503">503 <span>🚧</span></a>
           </div>
-        </div>
-
-        <div class="panel">
-          <div class="hint">Jump to a code</div>
-          <form id="statusForm" class="code-input">
-            <input type="number" name="code" placeholder="Enter status code (100-599)" min="100" max="599" required>
-            <button type="submit">Go</button>
-          </form>
         </div>
 
         <div class="footer">Powered by Cloudflare Workers</div>
@@ -152,24 +141,6 @@ function renderHomePage(): Response {
 }
 
 const statusCodes: Record<number, StatusCodeInfo> = {
-  200: {
-    code: 200,
-    name: 'OK',
-    description: 'The request has succeeded.',
-    emoji: '✅',
-  },
-  201: {
-    code: 201,
-    name: 'Created',
-    description: 'The request has been fulfilled and has resulted in one or more new resources being created.',
-    emoji: '✨',
-  },
-  204: {
-    code: 204,
-    name: 'No Content',
-    description: 'The server successfully processed the request and is not returning any content.',
-    emoji: '➖',
-  },
   400: {
     code: 400,
     name: 'Bad Request',
@@ -463,25 +434,7 @@ function createHTMLResponse(
   ${raySafe ? `<span class="tok-prop">sourceCfRayId</span><span class="tok-punc">:</span> <span class="tok-str">"${escapeHtml(raySafe)}"</span><span class="tok-punc">,</span>` : ''}
 <span class="tok-punc">}</span>
 
-<span class="tok-cmt">// Tip: change the code below and hit Go</span>
           </code></pre>
-{{ ... }}
-
-        <div class="panel">
-          <div class="hint">Open Command Palette: enter a status code</div>
-          <form id="statusForm" class="code-input">
-            <input 
-              type="number" 
-              name="code" 
-              placeholder="Enter status code (100-599)" 
-              min="100" 
-              max="599"
-              value="${statusInfo.code}"
-              required
-            >
-            <button type="submit">Go</button>
-          </form>
-        </div>
 
         <div class="footer">Powered by Cloudflare Workers · Status ${statusInfo.code} ${statusInfo.name}</div>
       </div>
