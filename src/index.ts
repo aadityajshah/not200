@@ -73,7 +73,7 @@ function renderHomePage(theme?: Theme): Response {
               <span class="dot yellow"></span>
               <span class="dot green"></span>
             </div>
-            <div class="title">Status Code Explorer</div>
+            <div class="title">Not200 - Ooops! Something went wrong!</div>
           </div>
           <label for="themeSelect" class="title" style="margin-left:auto;margin-right:8px;">Theme</label>
           <select id="themeSelect" class="theme-select" aria-label="Select theme">

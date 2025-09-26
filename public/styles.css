@@ -221,8 +221,8 @@ button:hover { background: #1d4ed8; }
     radial-gradient(60vw 14vh at 100% 100%, #15453a 40%, rgba(0,0,0,0) 41%);
   }
   .outdoor-status .block { background: #111827; color: #e2e8f0; }
-  .outdoor-status h1 { color: #e2e8f0; }
-  .outdoor-status p, .outdoor-status .meta, .outdoor-status .eyebrow { color: #c7d2fe; }
+  .outdoor-status h1 { color: #0f3b2e; }
+  .outdoor-status p, .outdoor-status .meta, .outdoor-status .eyebrow { color: #0f3b2e; }
 }
 
 /* Responsive adjustments */
