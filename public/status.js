@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
       reportBtn.disabled = true;
       reportBtn.textContent = 'Sending…';
 
-      const res = await fetch('/report', {
+      const res = await fetch('https://not200.com/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, ...(email ? { email } : {}) }),
