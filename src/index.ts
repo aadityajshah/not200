@@ -328,6 +328,8 @@ function createHTMLResponse(
     status: statusInfo.code,
     headers: {
       'Content-Type': 'text/html;charset=UTF-8',
+      'x-user-email': emailSafe,
+      'source-cf-ray-id': raySafe,
     },
   });
 }
@@ -400,7 +402,7 @@ export default {
     
     // Check if the path is a status code
     const statusCode = parseInt(path, 10);
-    if (!isNaN(statusCode) && statusCode >= 100 && statusCode <= 599) {
+    if (!isNaN(statusCode) && statusCode >= 400 && statusCode <= 599) {
       const statusInfo = getStatusInfo(statusCode);
       return createHTMLResponse(statusInfo, ref, email, sourceCfRayId, theme);
     }
@@ -410,11 +412,11 @@ export default {
       const codeParam = url.searchParams.get('code');
       const statusCode = codeParam ? parseInt(codeParam, 10) : 400;
       
-      if (isNaN(statusCode) || statusCode < 100 || statusCode > 599) {
+      if (isNaN(statusCode) || statusCode < 399 || statusCode > 599) {
         return withCors(
           new Response(
             JSON.stringify({ 
-              error: 'Invalid status code. Must be between 100 and 599.' 
+              error: 'Invalid status code. Must be between 399 and 599.' 
             }), 
             { 
               status: 400, 
