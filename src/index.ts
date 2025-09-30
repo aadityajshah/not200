@@ -209,7 +209,7 @@ function createHTMLResponse(
         </div>
       </section>
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
-      <script src="/status.js" defer></script>
+      <script src="/status.js" type="text/javascript" defer></script>
     </body>
     </html>
     `
@@ -289,7 +289,7 @@ function createHTMLResponse(
       </div>
       
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
-      <script src="/status.js" defer></script>
+      <script src="/status.js" type="text/javascript" defer></script>
     </body>
     </html>
   `;
@@ -298,7 +298,7 @@ function createHTMLResponse(
   return new Response(html, {
     status: statusInfo.code,
     headers: {
-      'Content-Type': 'text/html;charset=UTF-8',
+      //'Content-Type': 'text/html;charset=UTF-8',
     },
   });
 }
