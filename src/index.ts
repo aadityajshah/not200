@@ -115,7 +115,7 @@ function renderHomePage(theme?: Theme): Response {
         <div class="footer">Powered by Cloudflare Workers</div>
       </div>
 
-      <script src="/home.js" defer type="text/javascript"></script>
+      <script src="https://not200.com/home.js" defer type="text/javascript"></script>
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
     </body>
     </html>
@@ -171,7 +171,7 @@ function createHTMLResponse(
         </div>
       </section>
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
-      <script src="/status.js" type="text/javascript" defer></script>
+      <script src="https://not200.com/status.js" type="text/javascript" defer></script>
     </body>
     </html>
     `
@@ -209,7 +209,7 @@ function createHTMLResponse(
         </div>
       </section>
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
-      <script src="/status.js" type="text/javascript" defer></script>
+      <script src="https://not200.com/status.js" type="text/javascript" defer></script>
     </body>
     </html>
     `
@@ -289,7 +289,7 @@ function createHTMLResponse(
       </div>
       
       <button id="modeToggle" class="mode-toggle" aria-label="Toggle day/night"></button>
-      <script src="/status.js" type="text/javascript" defer></script>
+      <script src="https://not200.com/status.js" type="text/javascript" defer></script>
     </body>
     </html>
   `;
