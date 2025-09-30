@@ -167,8 +167,9 @@ function createHTMLResponse(
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="x-user-email" value="${escapeHtml(emailSafe)}">
-      <meta name="source-cf-aray-id" value="${escapeHtml(raySafe)}">
+      <meta name="x-status-code" content="${statusInfo.code}">
+      ${emailSafe ? `<meta name="x-user-email" content="${escapeHtml(emailSafe)}">` : ''}
+      ${raySafe ? `<meta name="source-cf-aray-id" value="${escapeHtml(raySafe)}">` : ''}
       <title>Not200 - Ooops! Something went wrong!</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -207,8 +208,9 @@ function createHTMLResponse(
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="x-user-email" value="${escapeHtml(emailSafe)}">
-      <meta name="source-cf-aray-id" value="${escapeHtml(raySafe)}">
+      <meta name="x-status-code" content="${statusInfo.code}">
+      ${emailSafe ? `<meta name="x-user-email" content="${escapeHtml(emailSafe)}">` : ''}
+      ${raySafe ? `<meta name="source-cf-aray-id" value="${escapeHtml(raySafe)}">` : ''}
       <title>Not200 - Ooops! Something went wrong!</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -246,8 +248,9 @@ function createHTMLResponse(
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="x-user-email" value="${escapeHtml(emailSafe)}">
-      <meta name="source-cf-aray-id" value="${escapeHtml(raySafe)}">
+      <meta name="x-status-code" content="${statusInfo.code}">
+      ${emailSafe ? `<meta name="x-user-email" content="${escapeHtml(emailSafe)}">` : ''}
+      ${raySafe ? `<meta name="source-cf-aray-id" value="${escapeHtml(raySafe)}">` : ''}
       <title>Not200 - Ooops! Something went wrong!</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -361,12 +364,18 @@ export default {
     // Handle report endpoint
     if (request.method === 'POST' && path === 'report') {
       try {
-        const emailHeader = request.headers.get('x-user-email');
-        if (!emailHeader) {
-          return withCors(new Response(JSON.stringify({ error: 'Missing x-user-email header' }), { status: 400, headers: { 'Content-Type': 'application/json' } }));
-        }
         const refHeader = request.headers.get('referer') || request.headers.get('referrer') || '';
         const rayId = request.headers.get('cf-ray') || request.headers.get('source-cf-ray-id') || '';
+
+                // Parse JSON body once
+        let body: any = undefined;
+        try { body = await request.json<any>(); } catch {}
+
+        // Accept email from header OR body
+        const emailValue = request.headers.get('x-user-email') || (body && typeof body.email === 'string' ? body.email : '');
+        if (!emailValue) {
+          return withCors(new Response(JSON.stringify({ error: 'Missing email (provide x-user-email header or body.email)' }), { status: 400, headers: { 'Content-Type': 'application/json' } }));
+        }
 
         let codeFromPath: number | undefined;
         const p = url.pathname.slice(1);
@@ -374,17 +383,14 @@ export default {
         if (!isNaN(n)) codeFromPath = n;
 
         let codeFromBody: number | undefined;
-        try {
-          const body = await request.json<any>();
-          if (body && typeof body.code === 'number') codeFromBody = body.code;
-        } catch {}
+        if (body && typeof body.code === 'number') codeFromBody = body.code;
 
         const code = codeFromBody ?? codeFromPath ?? 0;
         const ts = formatUtcTimestamp(new Date());
         const subject = `Not200 Report: ${code || 'N/A'}`;
         const text = `Status Code: ${code || 'N/A'}\nTimestamp: ${ts}\nCF-Ray-ID: ${rayId || 'N/A'}\nReferrer: ${refHeader || 'N/A'}`;
 
-        const mailRes = await sendReportEmail(emailHeader, subject, text);
+        const mailRes = await sendReportEmail(emailValue, subject, text);
         if (!mailRes.ok) {
           const msg = await mailRes.text();
           return withCors(new Response(JSON.stringify({ ok: false, error: msg }), { status: 502, headers: { 'Content-Type': 'application/json' } }));
