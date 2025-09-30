@@ -2,6 +2,9 @@
   Access-Control-Allow-Origin: *
   
 /public/status.js
-  Content-Type: application/javascript
+  Content-Type: text/javascript
   X-Content-Type-Options: nosniff
-
+  
+/public/home.js
+  Content-Type: text/javascript
+  X-Content-Type-Options: nosniff
