@@ -89,6 +89,7 @@ function renderHomePage(theme?: Theme): Response {
         </div>
 
         <div class="content">
+          <p>Hello! Welcome to my fun project! This page is meant to be a fun way to display errors, and gather data about them. On the timeline is the ability to generate a report and send it to the webmaster of the originating site. To use not200.com, simply redirect your error pages to https:\/\/not200.com/\<status-code\></p>
           <div class="heading">HTTP Status Playground</div>
           <div class="sub">Enter a status code below or try one of the quick links.</div>
           <div class="quick-grid">
