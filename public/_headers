@@ -4,7 +4,26 @@
 /public/status.js
   Content-Type: text/javascript
   X-Content-Type-Options: nosniff
-  
+  Access-Control-Allow-Origin: *
+
+/status.js
+  Content-Type: text/javascript
+  X-Content-Type-Options: nosniff
+  Access-Control-Allow-Origin: *
+
 /public/home.js
   Content-Type: text/javascript
   X-Content-Type-Options: nosniff
+  Access-Control-Allow-Origin: *
+
+/home.js
+  Content-Type: text/javascript
+  X-Content-Type-Options: nosniff
+  Access-Control-Allow-Origin: *
+
+/report
+  Access-Control-Allow-Origin: *
+
+/public/report
+  Access-Control-Allow-Origin: *
+
