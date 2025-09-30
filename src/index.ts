@@ -124,7 +124,30 @@ function renderHomePage(theme?: Theme): Response {
   return new Response(html, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
 }
 
+// CORS utilities
+function withCors(resp: Response, origin: string = '*'): Response {
+  const headers = new Headers(resp.headers);
+  headers.set('Access-Control-Allow-Origin', origin);
+  headers.append('Vary', 'Origin');
+  return new Response(resp.body, {
+    status: resp.status,
+    statusText: resp.statusText,
+    headers,
+  });
+}
 
+function corsPreflightResponse(origin: string = '*'): Response {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, x-user-email, source-cf-ray-id',
+      'Access-Control-Max-Age': '86400',
+      'Vary': 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
+    },
+  });
+}
 
 function createHTMLResponse(
   statusInfo: StatusCodeInfo,
@@ -313,8 +336,16 @@ export default {
     const themeParam = (url.searchParams.get('theme') || '').toLowerCase();
     const theme: Theme | undefined = themeParam === 'space' || themeParam === 'outdoors' || themeParam === 'current' ? (themeParam as Theme) : undefined;
 
+    // CORS preflight
+    if (request.method === 'OPTIONS') {
+      return corsPreflightResponse('*');
+    }
+
     // Serve static assets
-    if (request.method === 'GET' && (path === 'styles.css' || path === 'home.js' || path === 'status.js')) {
+    if (
+      request.method === 'GET' &&
+      (/\.(css|js|png|jpg|jpeg|gif|svg|webp|ico|map)$/i.test(path))
+    ) {
       // @ts-ignore - ASSETS is provided by Wrangler binding
       return env.ASSETS.fetch(request);
     }
@@ -324,7 +355,7 @@ export default {
       try {
         const emailHeader = request.headers.get('x-user-email');
         if (!emailHeader) {
-          return new Response(JSON.stringify({ error: 'Missing x-user-email header' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+          return withCors(new Response(JSON.stringify({ error: 'Missing x-user-email header' }), { status: 400, headers: { 'Content-Type': 'application/json' } }));
         }
         const refHeader = request.headers.get('referer') || request.headers.get('referrer') || '';
         const rayId = request.headers.get('cf-ray') || request.headers.get('source-cf-ray-id') || '';
@@ -348,11 +379,11 @@ export default {
         const mailRes = await sendReportEmail(emailHeader, subject, text);
         if (!mailRes.ok) {
           const msg = await mailRes.text();
-          return new Response(JSON.stringify({ ok: false, error: msg }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+          return withCors(new Response(JSON.stringify({ ok: false, error: msg }), { status: 502, headers: { 'Content-Type': 'application/json' } }));
         }
-        return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return withCors(new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
       } catch (e: any) {
-        return new Response(JSON.stringify({ error: e?.message || 'Unknown error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        return withCors(new Response(JSON.stringify({ error: e?.message || 'Unknown error' }), { status: 500, headers: { 'Content-Type': 'application/json' } }));
       }
     }
     
@@ -374,14 +405,16 @@ export default {
       const statusCode = codeParam ? parseInt(codeParam, 10) : 400;
       
       if (isNaN(statusCode) || statusCode < 100 || statusCode > 599) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Invalid status code. Must be between 100 and 599.' 
-          }), 
-          { 
-            status: 400, 
-            headers: { 'Content-Type': 'application/json' } 
-          }
+        return withCors(
+          new Response(
+            JSON.stringify({ 
+              error: 'Invalid status code. Must be between 100 and 599.' 
+            }), 
+            { 
+              status: 400, 
+              headers: { 'Content-Type': 'application/json' } 
+            }
+          )
         );
       }
       
@@ -392,12 +425,14 @@ export default {
         ...(sourceCfRayId ? { sourceCfRayId: sourceCfRayId } : {}),
       };
 
-      return new Response(
-        JSON.stringify(payload),
-        { 
-          status: statusCode,
-          headers: { 'Content-Type': 'application/json' } 
-        }
+      return withCors(
+        new Response(
+          JSON.stringify(payload),
+          { 
+            status: statusCode,
+            headers: { 'Content-Type': 'application/json' } 
+          }
+        )
       );
     }
     
