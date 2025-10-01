@@ -1,5 +1,7 @@
 
 import { getStatusInfo } from './status-codes';
+import { Resend } from 'resend';
+
 interface StatusCodeInfo {
   code: number;
   name: string;
@@ -9,22 +11,18 @@ interface StatusCodeInfo {
 
 async function sendReportEmail(toEmail: string, subject: string, textContent: string): Promise<Response> {
   const payload = {
-    personalizations: [
-      {
-        to: [{ email: toEmail }],
-      },
-    ],
-    from: { email: 'no-reply@not200.example', name: 'Not200 Reporter' },
-    subject,
-    content: [{ type: 'text/plain', value: textContent }],
+    from: 'not200 <no-reply@not200.com>',
+    to: [{ toEmail }],
+    subject: subject,
+    html: [{ textContent }],
   };
 
-  const res = await fetch('https://api.mailchannels.net/tx/v1/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+  const resend = new Resend('re_RmLstQDN_J9GC3PoTfTSn9DrMhCvs4dga');
+
+  const { data, error } = await resend.emails.send({
+    JSON.stringify(payload);
   });
-  return res;
+
 }
 
 function formatUtcTimestamp(d: Date): string {
