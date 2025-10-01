@@ -388,7 +388,10 @@ export default {
         const code = codeFromBody ?? codeFromPath ?? 0;
         const ts = formatUtcTimestamp(new Date());
         const subject = `Not200 Report: ${code || 'N/A'}`;
-        const text = `Status Code: ${code || 'N/A'}\nTimestamp: ${ts}\nCF-Ray-ID: ${rayId || 'N/A'}\nReferrer: ${refHeader || 'N/A'}`;
+        const text : string = `Status Code: ${code || 'N/A'}
+        Timestamp: ${ts}
+        CF-Ray-ID: ${rayId || 'N/A'}
+        Referrer: ${refHeader || 'N/A'}`;
 
         const mailRes = await sendReportEmail(emailValue, subject, text, env);
         if (!mailRes.success) {
