@@ -9,20 +9,21 @@ interface StatusCodeInfo {
   emoji: string;
 }
 
-async function sendReportEmail(toEmail: string, subject: string, textContent: string): Promise<Response> {
-  const payload = {
-    from: 'not200 <no-reply@not200.com>',
-    to: [{ toEmail }],
-    subject: subject,
-    html: [{ textContent }],
-  };
-
-  const resend = new Resend('re_RmLstQDN_J9GC3PoTfTSn9DrMhCvs4dga');
+async function sendReportEmail(toEmail: string, subject: string, textContent: string, env: Env): Promise<{ success: boolean; error?: string }> {
+  const resend = new Resend(env.RESEND_API_KEY);
 
   const { data, error } = await resend.emails.send({
-    JSON.stringify(payload);
+    from: 'not200 <no-reply@not200.com>',
+    to: [toEmail],
+    subject: subject,
+    html: textContent,
   });
 
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }
 
 function formatUtcTimestamp(d: Date): string {
@@ -389,10 +390,9 @@ export default {
         const subject = `Not200 Report: ${code || 'N/A'}`;
         const text = `Status Code: ${code || 'N/A'}\nTimestamp: ${ts}\nCF-Ray-ID: ${rayId || 'N/A'}\nReferrer: ${refHeader || 'N/A'}`;
 
-        const mailRes = await sendReportEmail(emailValue, subject, text);
-        if (!mailRes.ok) {
-          const msg = await mailRes.text();
-          return withCors(new Response(JSON.stringify({ ok: false, error: msg }), { status: 502, headers: { 'Content-Type': 'application/json' } }));
+        const mailRes = await sendReportEmail(emailValue, subject, text, env);
+        if (!mailRes.success) {
+          return withCors(new Response(JSON.stringify({ ok: false, error: mailRes.error || 'Email send failed' }), { status: 502, headers: { 'Content-Type': 'application/json' } }));
         }
         return withCors(new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
       } catch (e: any) {
