@@ -62,6 +62,9 @@ function renderHomePage(theme?: Theme): Response {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="https://not200.com/styles.css">
+      <link rel="stylesheet" href="https://not200.com/prism.css">
+      <script src="https://not200.com/prism.js" type="text/javascript" defer></script>
+
     </head>
     <body>
       <div class="container">
@@ -91,31 +94,31 @@ function renderHomePage(theme?: Theme): Response {
           <p>Hello! Welcome to my fun project! <br />This page is meant to be a fun way to display errors, and gather data about them. On the timeline is the ability to generate a report and send it to the webmaster of the originating site. To use not200.com, simply redirect your error pages to https:\/\/not200.com/\<status-code\> <br /> 
           If you are using Cloudflare, you can use the Snippet Rule below to push the necessary headers to the end user, and turn on the Send a Report feature.  </p>
           <br />
-          <code>
-export default {
-  async fetch(request) {
-    // Send original request to the origin
-    const response = await fetch(request);
+          <code class="language-js" data-prismjs-copy="Copy the code">
+              export default {
+                async fetch(request) {
+                  // Send original request to the origin
+                  const response = await fetch(request);
 
-    // If response is not 200 OK or a redirect, send to another origin
-    if (!response.ok && !response.redirected) {
-      const origCode = response.status;
-      // First, clone the original request to construct a new request
-      const newRequest = new Request(request);
-      // Add a header to identify a re-routed request at the new origin
-      newRequest.headers.set("x-user-email", "[WEBMASTER EMAIL]");
-      newRequest.headers.set("source-cf-ray-id", response.headers.get('cf-ray'))
-      // Clone the original URL
-      // Send request to a different origin / hostname
-      const url = "https://not200.com/" + origCode + "?theme=space";
-      // Serve response to the new request from the origin
-      return await fetch(url, newRequest);
-    }
+                  // If response is not 200 OK or a redirect, send to another origin
+                  if (!response.ok && !response.redirected) {
+                    const origCode = response.status;
+                    // First, clone the original request to construct a new request
+                    const newRequest = new Request(request);
+                    // Add a header to identify a re-routed request at the new origin
+                    newRequest.headers.set("x-user-email", "[WEBMASTER EMAIL]");
+                    newRequest.headers.set("source-cf-ray-id", response.headers.get('cf-ray'))
+                    // Clone the original URL
+                    // Send request to a different origin / hostname
+                    const url = "https://not200.com/" + origCode + "?theme=space";
+                    // Serve response to the new request from the origin
+                    return await fetch(url, newRequest);
+                  }
 
-    // If response is 200 OK or a redirect, serve it
-    return response;
-  },
-};
+                  // If response is 200 OK or a redirect, serve it
+                  return response;
+                },
+              };
           </code>
           <div class="heading">HTTP Status Playground</div>
           <div class="sub">Enter a status code below or try one of the quick links.</div>
