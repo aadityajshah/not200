@@ -63,7 +63,7 @@ function renderHomePage(theme?: Theme): Response {
       <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="https://not200.com/styles.css">
       <link rel="stylesheet" href="https://not200.com/prism.css">
-      <script src="https://not200.com/prism.js" type="text/javascript" data-manual></script>
+      <script src="https://not200.com/prism.js" type="text/javascript"></script>
 
     </head>
     <body>
@@ -95,28 +95,28 @@ function renderHomePage(theme?: Theme): Response {
           If you are using Cloudflare, you can use the Snippet Rule below to push the necessary headers to the end user, and turn on the Send a Report feature.  </p>
           <br />
           <pre><code class="language-js" data-prismjs-copy="Copy the code">
-              export default { \n
-                async fetch(request) {\n
-                  // Send original request to the origin\n
-                  const response = await fetch(request);\n
+              export default { 
+                async fetch(request) {
+                  // Send original request to the origin
+                  const response = await fetch(request);
 
-                  // If response is not 200 OK or a redirect, send to another origin\n
-                  if (!response.ok && !response.redirected) {\n
-                    const origCode = response.status;\n
-                    // First, clone the original request to construct a new request\n
-                    const newRequest = new Request(request);\n
-                    // Add a header to identify a re-routed request at the new origin\n
-                    newRequest.headers.set("x-user-email", "[WEBMASTER EMAIL]");\n
-                    newRequest.headers.set("source-cf-ray-id", response.headers.get('cf-ray'))\n
-                    // Clone the original URL\n
-                    // Send request to a different origin / hostname\n
-                    const url = "https://not200.com/" + origCode + "?theme=space";\n
-                    // Serve response to the new request from the origin\n
-                    return await fetch(url, newRequest);\n
+                  // If response is not 200 OK or a redirect, send to another origin
+                  if (!response.ok && !response.redirected) {
+                    const origCode = response.status;
+                    // First, clone the original request to construct a new request
+                    const newRequest = new Request(request);
+                    // Add a header to identify a re-routed request at the new origin
+                    newRequest.headers.set("x-user-email", "[WEBMASTER EMAIL]");
+                    newRequest.headers.set("source-cf-ray-id", response.headers.get('cf-ray'))
+                    // Clone the original URL
+                    // Send request to a different origin / hostname
+                    const url = "https://not200.com/" + origCode + "?theme=space";
+                    // Serve response to the new request from the origin
+                    return await fetch(url, newRequest);
                   }
 
-                  // If response is 200 OK or a redirect, serve it\n
-                  return response;\n
+                  // If response is 200 OK or a redirect, serve it
+                  return response;
                 },
               };
           </code></pre>
