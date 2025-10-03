@@ -94,7 +94,7 @@ function renderHomePage(theme?: Theme): Response {
           <p>Hello! Welcome to my fun project! <br />This page is meant to be a fun way to display errors, and gather data about them. On the timeline is the ability to generate a report and send it to the webmaster of the originating site. To use not200.com, simply redirect your error pages to https:\/\/not200.com/\<status-code\> <br /> 
           If you are using Cloudflare, you can use the Snippet Rule below to push the necessary headers to the end user, and turn on the Send a Report feature.  </p>
           <br />
-          <code class="language-js" data-prismjs-copy="Copy the code">
+          <pre><code class="language-js" data-prismjs-copy="Copy the code">
               export default { \n
                 async fetch(request) {\n
                   // Send original request to the origin\n
@@ -119,7 +119,7 @@ function renderHomePage(theme?: Theme): Response {
                   return response;\n
                 },
               };
-          </code>
+          </code></pre>
           <div class="heading">HTTP Status Playground</div>
           <div class="sub">Enter a status code below or try one of the quick links.</div>
           <div class="quick-grid">
