@@ -62,7 +62,7 @@ function renderHomePage(theme?: Theme): Response {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="https://not200.com/styles.css">
-      <link rel="stylesheet" href="https://not200.com/prism.css">
+      <link rel="stylesheet" href="https://not200.com/prism-dark.css">
       <script src="https://not200.com/prism.js" type="text/javascript"></script>
 
     </head>
@@ -91,9 +91,9 @@ function renderHomePage(theme?: Theme): Response {
         </div>
 
         <div class="content">
-          <p>Hello! Welcome to my fun project! <br />This page is meant to be a fun way to display errors, and gather data about them. On the timeline is the ability to generate a report and send it to the webmaster of the originating site. To use not200.com, simply redirect your error pages to https:\/\/not200.com/\<status-code\> <br /> 
+          <p>Hello! Welcome to my fun project! <br /><br />This page is meant to be a fun way to display errors, and gather data about them. On the timeline is the ability to generate a report and send it to the webmaster of the originating site. To use not200.com, simply redirect your error pages to https:\/\/not200.com/\<status-code\> <br /><br /> 
           If you are using Cloudflare, you can use the Snippet Rule below to push the necessary headers to the end user, and turn on the Send a Report feature.  </p>
-          <br />
+          <br /><br /><br />
           <pre><code class="language-js" data-prismjs-copy="Copy the code">
               export default { 
                 async fetch(request) {
